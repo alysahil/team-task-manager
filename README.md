@@ -1,87 +1,229 @@
-# TaskFlow - Team Task Manager (Full-Stack)
+# 🚀 TaskFlow — Team Task Manager
 
-TaskFlow is a premium, full-stack team task manager built with React, Node.js, Express, and PostgreSQL (via Prisma). It features an ultra-modern aesthetic with glassmorphism, dynamic gradients, and role-based access control.
+A full-stack Team Task Manager web application built with **Node.js**, **React**, and **PostgreSQL**, featuring role-based access control, Kanban-style task tracking, and a real-time commenting system.
 
-## 🚀 Features
+![TaskFlow](https://img.shields.io/badge/Status-Live-brightgreen) ![Node](https://img.shields.io/badge/Node.js-18+-green) ![React](https://img.shields.io/badge/React-18-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)
 
-- **Authentication**: Secure Signup/Login using JWT.
-- **Role-Based Access**: 
-  - **Admin**: Can create projects, create tasks, assign users, and update any task.
-  - **Member**: Can view projects, view tasks, and update the status of their assigned tasks.
-- **Premium UI**: Built with Vanilla CSS utilizing CSS variables, glassmorphism (`backdrop-filter`), micro-animations, and responsive layouts without Tailwind.
-- **Dashboard**: Real-time overview of tasks (Pending, In Progress, Completed, Overdue) and active projects.
-- **Project Management**: Create and oversee multiple projects.
-- **Task Management**: Create tasks, assign members, set due dates, and update statuses using a Kanban-style list approach.
+---
+
+## 🌐 Live Demo
+
+**Live URL:** `https://team-task-manager-production-b7cb.up.railway.app`
+
+**GitHub Repository:** `https://github.com/alysahil/team-task-manager`
+
+---
+
+## 📸 Features
+
+### 🔐 Authentication
+- Secure **JWT-based** Login & Registration
+- Password hashing with **bcryptjs**
+- Role selection on signup: **Admin** or **Member**
+
+### 👥 Role-Based Access Control (RBAC)
+| Feature | Admin | Member |
+|---|---|---|
+| Create Projects | ✅ | ❌ |
+| Create Tasks | ✅ | ❌ |
+| Assign Tasks to Users | ✅ | ❌ |
+| Update Task Status | ✅ (any task) | ✅ (assigned tasks only) |
+| Add Comments | ✅ (any task) | ✅ (assigned tasks only) |
+| View All Projects & Tasks | ✅ | ✅ |
+
+### 📋 Task Management
+- **Kanban Board** with 4 columns: `To Do` → `In Progress` → `In Review` → `Completed`
+- Task **due dates** with overdue highlighting
+- Task **assignment** to specific team members
+- Task **Details Modal** with full comment thread
+
+### 💬 Comments System
+- Members can comment on tasks assigned to them
+- Admins can comment on any task
+- Timestamps and role badges on each comment
+- Permission message shown for unauthorized users
+
+### 📊 Dashboard
+- Live counts of Pending, In Progress, Completed tasks
+- **Overdue task** detection and display
+- Recent task activity feed
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Vite + React + React Router + Vanilla CSS
-- **Backend**: Node.js + Express
-- **Database**: PostgreSQL
-- **ORM**: Prisma
-- **Auth**: JWT & bcryptjs
+| Layer | Technology |
+|---|---|
+| **Frontend** | React 18 + Vite, Vanilla CSS, Lucide Icons |
+| **Backend** | Node.js + Express.js |
+| **Database** | PostgreSQL (via Railway) |
+| **ORM** | Prisma |
+| **Auth** | JSON Web Tokens (JWT) + bcryptjs |
+| **Deployment** | Railway (full-stack monorepo) |
 
 ---
 
-## 🏃‍♂️ Running Locally
+## 🗄️ Database Schema
 
-1. **Prerequisites**: Node.js (v18+) and a running PostgreSQL instance.
-2. **Install Dependencies**:
-   ```bash
-   npm run install:all
-   ```
-3. **Database Setup**:
-   - Create a PostgreSQL database.
-   - Rename `server/.env.example` to `server/.env` and update the `DATABASE_URL`.
-   - Run migrations:
-     ```bash
-     cd server
-     npx prisma db push
-     ```
-4. **Start Development Servers**:
-   - Open two terminal windows.
-   - **Terminal 1 (Backend)**: `cd server && npm start` (or use nodemon if installed)
-   - **Terminal 2 (Frontend)**: `cd client && npm run dev`
+```
+User          Project         Task            Comment
+────────      ──────────      ──────────      ──────────
+id            id              id              id
+name          name            title           content
+email         description     description     taskId → Task
+password      ownerId → User  status          userId → User
+role          createdAt       dueDate         createdAt
+createdAt                     projectId → Project
+                              assigneeId → User
+                              createdAt
+```
 
----
-
-## 🌐 Deploying to Railway (Mandatory Requirement)
-
-Since you don't have a Railway account yet, deploying is extremely easy and free. Follow these steps:
-
-1. **Push to GitHub**:
-   - Initialize a Git repository here and push this entire folder to your GitHub account as a new public or private repository.
-
-2. **Create a Railway Account**:
-   - Go to [Railway.app](https://railway.app/) and sign up using your GitHub account.
-
-3. **Provision PostgreSQL on Railway**:
-   - In the Railway Dashboard, click **New Project** -> **Provision PostgreSQL**.
-   - Wait a few seconds for the database to be ready.
-
-4. **Deploy the Code**:
-   - Click **Create** (or **+ New** button) in the same project -> **GitHub Repo** -> Select your pushed repository.
-   - Railway will automatically detect the `package.json` and `railway.json` and start building the app.
-
-5. **Connect Database to App**:
-   - Go to your App Service settings in Railway.
-   - Go to the **Variables** tab.
-   - Add a new variable `DATABASE_URL` and set its value to `${{Postgres.DATABASE_URL}}` (Railway's autocomplete will suggest this).
-   - Add `JWT_SECRET` with any random secure string.
-   - Add `PORT` as `5000`.
-
-6. **Migrate Production Database**:
-   - Add a `postinstall` script in the root `package.json` or run the Prisma push manually.
-   - To do it automatically, update the root `package.json` build script to:
-     `"build": "npm install --prefix server && npm install --prefix client && npx prisma generate --schema=./server/prisma/schema.prisma && npx prisma db push --schema=./server/prisma/schema.prisma && npm run build --prefix client"`
-   
-7. **View Live App**:
-   - Go to the **Settings** tab of your App Service in Railway, click **Generate Domain**, and click the link!
+### Task Status Flow
+```
+PENDING / TODO → IN_PROGRESS → IN_REVIEW → COMPLETED
+```
 
 ---
 
-## 📦 Submission Details
+## 🚀 Getting Started (Local Development)
 
-- **Live URL**: (Paste your Railway URL here after deploying)
-- **GitHub Repo**: (Paste your GitHub URL here)
-- **Video Demo**: (Record a 2-5 min Loom or local screen recording demonstrating Login, Admin Project Creation, Member Task update, and Dashboard)
+### Prerequisites
+- Node.js v18+
+- npm v9+
+- PostgreSQL database (or use SQLite for local dev)
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/alysahil/team-task-manager.git
+cd team-task-manager
+```
+
+### 2. Install Dependencies
+```bash
+npm run install:all
+```
+
+### 3. Configure Environment Variables
+Create `server/.env`:
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/taskflow"
+JWT_SECRET="your-super-secret-jwt-key"
+PORT=5000
+```
+
+### 4. Run Database Migrations
+```bash
+cd server
+npx prisma db push
+```
+
+### 5. Start the Development Servers
+
+**Backend** (from `server/` directory):
+```bash
+node server.js
+```
+
+**Frontend** (from `client/` directory):
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`
+
+---
+
+## 🌐 Deployment (Railway)
+
+This project is configured for one-click deployment on Railway.
+
+### Steps:
+1. Fork this repository to your GitHub account
+2. Go to [Railway.app](https://railway.app) and create a new project
+3. Click **Provision PostgreSQL** to add a database
+4. Click **New → GitHub Repo** and select this repository
+5. In the service **Variables** tab, add:
+   - `DATABASE_URL` → link to your Postgres service
+   - `JWT_SECRET` → any random secret string
+6. Railway will automatically build and deploy the app
+
+The start command runs `prisma db push` automatically before starting the server, so no manual migrations are needed.
+
+---
+
+## 📡 API Endpoints
+
+### Authentication
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/api/auth/register` | None | Register a new user |
+| POST | `/api/auth/login` | None | Login and get JWT |
+| GET | `/api/auth/me` | JWT | Get current user |
+
+### Projects
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/api/projects` | JWT | Get all projects |
+| POST | `/api/projects` | JWT + Admin | Create a project |
+
+### Tasks
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/api/tasks` | JWT | Get all tasks (with comments) |
+| POST | `/api/tasks` | JWT + Admin | Create a task |
+| PUT | `/api/tasks/:id/status` | JWT + Owner/Admin | Update task status |
+| POST | `/api/tasks/:id/comments` | JWT + Assignee/Admin | Add a comment |
+
+### Users
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/api/users` | JWT | Get all users (for assignment) |
+
+---
+
+## 📁 Project Structure
+
+```
+team-task-manager/
+├── client/                    # React + Vite frontend
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Auth.jsx       # Login / Register page
+│   │   │   ├── Dashboard.jsx  # Overview stats
+│   │   │   ├── Projects.jsx   # Project list
+│   │   │   └── Tasks.jsx      # Kanban board + modals
+│   │   ├── App.jsx            # Router setup
+│   │   ├── main.jsx           # Entry point
+│   │   └── index.css          # Global design system
+│   └── vite.config.js
+│
+├── server/                    # Express backend
+│   ├── prisma/
+│   │   └── schema.prisma      # DB models & enums
+│   ├── server.js              # All API routes
+│   └── package.json
+│
+├── package.json               # Root scripts (build + start)
+├── railway.json               # Railway deployment config
+└── README.md
+```
+
+---
+
+## 🎯 Assignment Requirements Checklist
+
+- [x] **Authentication** — JWT-based signup/login
+- [x] **Project & Team Management** — Admin creates projects, all users view them
+- [x] **Task Creation, Assignment & Status Tracking** — Full Kanban workflow
+- [x] **Dashboard** — Live metrics including overdue tasks
+- [x] **REST APIs** — Full RESTful backend with Express.js
+- [x] **PostgreSQL Database** — Managed via Prisma ORM
+- [x] **Proper Validations & Relationships** — FK constraints, bcrypt, JWT validation
+- [x] **Role-Based Access Control** — Admin vs Member permissions enforced at API level
+- [x] **Deployed on Railway** — Live and fully functional
+
+---
+
+## 👨‍💻 Author
+
+**Sahil** — [@alysahil](https://github.com/alysahil)
