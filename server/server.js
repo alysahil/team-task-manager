@@ -15,6 +15,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 app.use(cors());
 app.use(express.json());
 
+// Public health check endpoint for Railway
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
+
 // --- Authentication Middleware ---
 const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
