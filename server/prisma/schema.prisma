@@ -60,6 +60,7 @@ enum Role {
 }
 
 enum TaskStatus {
+  PENDING
   TODO
   IN_PROGRESS
   IN_REVIEW

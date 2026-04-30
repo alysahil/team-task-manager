@@ -5,6 +5,7 @@ import { CheckSquare, Plus, X, MessageSquare, Clock, User, ChevronDown } from 'l
 const STATUSES = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'COMPLETED'];
 
 const STATUS_LABELS = {
+  PENDING: 'To Do',
   TODO: 'To Do',
   IN_PROGRESS: 'In Progress',
   IN_REVIEW: 'In Review',
@@ -12,6 +13,7 @@ const STATUS_LABELS = {
 };
 
 const STATUS_COLORS = {
+  PENDING: '#a78bfa',
   TODO: '#a78bfa',
   IN_PROGRESS: '#60a5fa',
   IN_REVIEW: '#fb923c',
@@ -124,7 +126,7 @@ export default function Tasks() {
               <span className="col-count">{tasks.filter(t => t.status === status).length}</span>
             </div>
             <div className="kanban-cards">
-              {tasks.filter(t => t.status === status).map(task => (
+              {tasks.filter(t => t.status === status || (status === 'TODO' && t.status === 'PENDING')).map(task => (
                 <div
                   key={task.id}
                   className={`task-card ${isOverdue(task) ? 'overdue-card' : ''}`}
