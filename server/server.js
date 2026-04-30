@@ -131,10 +131,16 @@ app.get('/api/tasks', authenticate, async (req, res) => {
     const whereClause = {};
     if (projectId) whereClause.projectId = projectId;
     
-    // Members see all tasks but might only edit their own. Let's return all.
     const tasks = await prisma.task.findMany({
       where: whereClause,
-      include: { assignee: { select: { name: true } }, project: { select: { name: true } } },
+      include: {
+        assignee: { select: { id: true, name: true } },
+        project: { select: { name: true } },
+        comments: {
+          include: { user: { select: { id: true, name: true, role: true } } },
+          orderBy: { createdAt: 'asc' }
+        }
+      },
       orderBy: { createdAt: 'desc' }
     });
     res.json(tasks);
@@ -143,21 +149,64 @@ app.get('/api/tasks', authenticate, async (req, res) => {
   }
 });
 
+// Update task status — admin can update any; member can only update their assigned task
 app.put('/api/tasks/:id/status', authenticate, async (req, res) => {
   try {
     const { status } = req.body;
+    const validStatuses = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'COMPLETED'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status value' });
+    }
+
     const task = await prisma.task.findUnique({ where: { id: req.params.id } });
     if (!task) return res.status(404).json({ error: 'Task not found' });
     
     if (req.user.role !== 'ADMIN' && task.assigneeId !== req.user.id) {
-      return res.status(403).json({ error: 'Not authorized to update this task' });
+      return res.status(403).json({ error: 'Not authorized: you can only update tasks assigned to you' });
     }
 
     const updatedTask = await prisma.task.update({
       where: { id: req.params.id },
-      data: { status }
+      data: { status },
+      include: {
+        assignee: { select: { id: true, name: true } },
+        project: { select: { name: true } },
+        comments: {
+          include: { user: { select: { id: true, name: true, role: true } } },
+          orderBy: { createdAt: 'asc' }
+        }
+      }
     });
     res.json(updatedTask);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add comment to a task — admin can comment on any; member can only comment on assigned task
+app.post('/api/tasks/:id/comments', authenticate, async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content || !content.trim()) {
+      return res.status(400).json({ error: 'Comment content is required' });
+    }
+
+    const task = await prisma.task.findUnique({ where: { id: req.params.id } });
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+
+    if (req.user.role !== 'ADMIN' && task.assigneeId !== req.user.id) {
+      return res.status(403).json({ error: 'Not authorized: you can only comment on tasks assigned to you' });
+    }
+
+    const comment = await prisma.comment.create({
+      data: {
+        content: content.trim(),
+        taskId: req.params.id,
+        userId: req.user.id
+      },
+      include: { user: { select: { id: true, name: true, role: true } } }
+    });
+    res.status(201).json(comment);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
